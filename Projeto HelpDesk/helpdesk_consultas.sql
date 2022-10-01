@@ -24,8 +24,8 @@ inner join tecnico_chamado on chamado.ID_Chamado = tecnico_chamado.id_chamado
 where tecnico_chamado.cpf = '44422211111' and chamado.stts = 'Pendente';
 
 #Técnicos que estão acompanhando um chamado em que houve furto de computador
-select usuario.nome as Nome do Técnico, usuario.cpf as CPF, tecnico.grupo_tecnico as Grupo Técnico,
-acompanhamento.comentario as comentário from usuario
+select usuario.nome as `Nome do Técnico`, usuario.cpf as `CPF`, tecnico.grupo_tecnico as `Grupo Técnico`,
+acompanhamento.comentario as `comentário` from usuario
 inner join tecnico on tecnico.cpf = usuario.cpf
 inner join acompanhamento on tecnico.cpf = acompanhamento.cpf_usuario where acompanhamento.comentario ='Roubou meu pc';
 
@@ -37,3 +37,52 @@ inner join funcionario f on f.cpf = u.cpf
 inner join chamado c on c.cpf_func = f.cpf
 where c.stts != 'Concluído'
 order by u.nome;
+
+# Relação de chamados concluídos, agrupados por empresa, e sua quantidade
+select c.stts as `Status`, e.nome_empresa as `Empresa`, COUNT(*) as `Total`
+from chamado c inner join funcionario f
+on c.cpf_func=f.cpf
+inner join empresa e
+on e.cnpj=f.cnpj
+where c.stts = 'Concluído'
+group by e.cnpj;
+
+select * from chamado;
+
+# Relação de todos os chamados da empresa Ganso Vidros
+select c.id_chamado as `ID`, c.stts as `Status`, c.categoria as `Categoria`, e.nome_empresa as `Empresa`
+from chamado c inner join funcionario f
+on c.cpf_func=f.cpf
+inner join empresa e
+on e.cnpj=f.cnpj
+where e.nome_empresa = 'Ganso vidros';
+
+# Inserir chamado novo
+insert into Chamado (cpf_func, categoria, descricao, stts, tempo_solucao) values
+('22222211111','Computador', 'Tela com problemas.', default, '1:00:00');
+
+select * from chamado;
+
+# Realizar update no chamado, marcando como concluído
+update chamado
+set stts = 'Pendente'
+where id_chamado = 2;
+
+select * from chamado;
+
+# Contagem de chamados por status da empresa Ganso Vidros
+select e.nome_empresa as `Empresa`, c.stts as `Status`, count(*) as `Quantidade`
+from chamado c inner join funcionario f
+on c.cpf_func=f.cpf
+inner join empresa e
+on e.cnpj=f.cnpj
+where e.nome_empresa = 'Ganso vidros'
+group by c.stts;
+
+select c.stts as `Status`, count(*) as `Quantidade`
+from chamado c inner join funcionario f
+on c.cpf_func=f.cpf
+inner join empresa e
+on e.cnpj=f.cnpj
+where e.nome_empresa = 'Ganso vidros'
+group by c.stts with rollup;
